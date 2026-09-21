@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Origin of Tea - Interactive Canvas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Noto+Serif+TC:wght@300;400;600;700&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --paper: #e6dfc8;
+            --paper-dark: #d5ccb0;
+            --ink: #2c3327;
+            --green-main: #5c6b54;
+            --green-light: #7e8c75;
+            --green-dark: #4a5743;
+            --red-accent: #9b433c;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--paper);
+            color: var(--ink);
+            overflow-x: hidden;
+            font-family: 'Noto Serif TC', serif;
+        }
+
+        .font-en { font-family: 'Cormorant Garamond', serif; }
+        .font-data { font-family: 'Inter', sans-serif; }
+        .vertical-rl { writing-mode: vertical-rl; text-orientation: mixed; }
+
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 50;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08' mix-blend-mode='multiply'/%3E%3C/svg%3E");
+        }
+
+        #scrolly-container {
+            position: relative;
+            width: 100%;
+        }
+
+        #sticky-viewport {
+            position: sticky;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* The massive poster canvas */
+        #poster-canvas {
+            position: absolute;
+            width: 1200px;
+            height: 2400px;
+            transform-origin: top left;
+            will-change: transform;
+        }
+
+        /* The SVG Landscape */
+        .landscape-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* UI Overlays */
+        .ui-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .ui-element {
+            position: absolute;
+            pointer-events: auto;
+        }
+
+        /* Connecting lines */
+        .infographic-line {
+            stroke: var(--ink);
+            stroke-width: 1.5;
+            stroke-dasharray: 2 4;
+            fill: none;
+            opacity: 0.6;
+        }
+
+        /* Red Seal */
+        .red-seal {
+            border: 2px solid var(--red-accent);
+            color: var(--red-accent);
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            mix-blend-mode: multiply;
+        }
+
+        .scene-text {
+            opacity: 0;
+            background: rgba(230, 223, 200, 0.85);
+            backdrop-filter: blur(4px);
+            padding: 1rem;
+            border: 1px solid rgba(44, 51, 39, 0.2);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            pointer-events: none;
+        }
+
+        .steam-line {
+            stroke: #fff;
+            stroke-width: 3;
+            stroke-linecap: round;
+            fill: none;
+            filter: blur(2px);
+            opacity: 0.7;
+        }
+
+        /* Left/Right static columns for Scene 1 */
+        .side-column {
+            width: 250px;
+            height: 100%;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            will-change: opacity;
+        }
+
+        #left-col { left: 0; }
+        #right-col { right: 0; }
+
+    </style>
+</head>
+<body>
+
+    <div class="noise-overlay"></div>
+
+    <div id="scrolly-container">
+        <div id="sticky-viewport">
+            
+            <div id="poster-canvas">
+                
+                <!-- SVG Landscape -->
+                <svg viewBox="0 0 1200 2400" class="landscape-svg">
+                    <defs>
+                        <filter id="ink-blur"><feGaussianBlur stdDeviation="1.5"/></filter>
+                        <linearGradient id="river-grad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#7e8c75" stop-opacity="0.6"/>
+                            <stop offset="100%" stop-color="#d5ccb0" stop-opacity="0.8"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Background Base -->
+                    <rect width="1200" height="2400" fill="#e6dfc8" />
+
+                    <!-- MOUNTAINS (Top section 0 - 800) -->
+                    <g id="mountains">
+                        <!-- Back mountains -->
+                        <path d="M 100,500 Q 250,150 400,400 T 700,500" fill="#7e8c75" opacity="0.4" stroke="#2c3327" stroke-width="1"/>
+                        <path d="M 500,500 Q 650,50 850,350 T 1100,500" fill="#7e8c75" opacity="0.4" stroke="#2c3327" stroke-width="1"/>
+                        
+                        <!-- Mid mountains -->
+                        <path d="M 200,600 Q 400,100 550,450 T 900,600" fill="#5c6b54" opacity="0.7" stroke="#2c3327" stroke-width="2"/>
+                        
+                        <!-- Main Central Peak -->
+                        <path d="M 350,700 C 400,300 500,100 600,100 C 700,100 800,300 850,700 Z" fill="#4a5743" stroke="#2c3327" stroke-width="3"/>
+                        <path d="M 600,100 C 650,300 650,500 750,700" fill="none" stroke="#2c3327" stroke-width="2" opacity="0.5"/>
+                        <path d="M 600,100 C 550,300 500,500 450,700" fill="none" stroke="#2c3327" stroke-width="2" opacity="0.5"/>
+
+                        <!-- Foreground mountains / rocks -->
+                        <path d="M 250,800 Q 350,500 450,750 T 650,800" fill="#5c6b54" stroke="#2c3327" stroke-width="2"/>
+                        <path d="M 550,800 Q 650,550 750,750 T 950,800" fill="#5c6b54" stroke="#2c3327" stroke-width="2"/>
+                    </g>
+
+                    <!-- CLOUDS -->
+                    <g id="clouds" fill="#e6dfc8" stroke="#2c3327" stroke-width="1.5" opacity="0.9">
+                        <path class="cloud" d="M 350,500 C 350,480 380,470 400,480 C 420,460 460,460 480,480 C 500,470 530,480 530,500 Z" />
+                        <path class="cloud" d="M 700,350 C 700,330 730,320 750,330 C 770,310 810,310 830,330 C 850,320 880,330 880,350 Z" />
+                        <path class="cloud" d="M 200,650 C 200,630 230,620 250,630 C 270,610 310,610 330,630 C 350,620 380,630 380,650 Z" />
+                        <path class="cloud" d="M 850,600 C 850,580 880,570 900,580 C 920,560 960,560 980,580 C 1000,570 1030,580 1030,600 Z" />
+                    </g>
+
+                    <!-- BIRDS -->
+                    <g stroke="#2c3327" stroke-width="2" fill="none">
+                        <path d="M 400,250 Q 410,240 420,250 Q 430,240 440,250" />
+                        <path d="M 750,200 Q 760,190 770,200 Q 780,190 790,200" />
+                    </g>
+
+                    <!-- RIVER & LANDSCAPE (800 - 1800) -->
+                    <g id="landscape">
+                        <!-- The winding river -->
+                        <path d="M 550,750 C 500,900 700,1100 550,1300 C 400,1500 700,1600 600,1900 L 700,1900 C 800,1600 500,1500 650,1300 C 800,1100 600,900 650,750 Z" fill="url(#river-grad)" stroke="#2c3327" stroke-width="1"/>
+                        
+                        <!-- River lines -->
+                        <path d="M 570,800 C 530,900 680,1100 570,1300 C 430,1500 670,1600 620,1850" fill="none" stroke="#2c3327" stroke-width="0.5" opacity="0.5"/>
+                        <path d="M 600,800 C 560,900 710,1100 600,1300 C 460,1500 700,1600 650,1850" fill="none" stroke="#2c3327" stroke-width="0.5" opacity="0.5"/>
+
+                        <!-- Village / Pavilion -->
+                        <g transform="translate(420, 850)">
+                            <rect x="0" y="20" width="60" height="30" fill="#e6dfc8" stroke="#2c3327" stroke-width="2"/>
+                            <path d="M -10,20 L 30,0 L 70,20 Z" fill="#9b433c" stroke="#2c3327" stroke-width="2"/>
+                            <line x1="10" y1="20" x2="10" y2="50" stroke="#2c3327" stroke-width="1"/>
+                            <line x1="30" y1="20" x2="30" y2="50" stroke="#2c3327" stroke-width="1"/>
+                            <line x1="50" y1="20" x2="50" y2="50" stroke="#2c3327" stroke-width="1"/>
+                        </g>
+                        
+                        <!-- Trees near village -->
+                        <path d="M 380,880 Q 390,840 400,880 Q 410,840 420,880 Z" fill="#4a5743" stroke="#2c3327"/>
+                        <path d="M 490,870 Q 500,830 510,870 Q 520,830 530,870 Z" fill="#4a5743" stroke="#2c3327"/>
+
+                        <!-- Tea Terraces (Left side) -->
+                        <g transform="translate(250, 1000)">
+                            <path d="M 0,50 Q 100,0 200,50 L 200,80 Q 100,30 0,80 Z" fill="#7e8c75" stroke="#2c3327" stroke-width="1.5"/>
+                            <path d="M 0,80 Q 100,30 200,80 L 200,110 Q 100,60 0,110 Z" fill="#5c6b54" stroke="#2c3327" stroke-width="1.5"/>
+                            <path d="M -20,110 Q 100,60 220,110 L 220,140 Q 100,90 -20,140 Z" fill="#4a5743" stroke="#2c3327" stroke-width="1.5"/>
+                            <!-- Bushes detail -->
+                            <path d="M 20,65 Q 30,55 40,65 T 60,65 T 80,65" fill="none" stroke="#2c3327" stroke-width="1" opacity="0.5"/>
+                            <path d="M 10,95 Q 20,85 30,95 T 50,95 T 70,95" fill="none" stroke="#2c3327" stroke-width="1" opacity="0.5"/>
+                        </g>
+
+                        <!-- Tea Terraces (Right side) -->
+                        <g transform="translate(700, 1200)">
+                            <path d="M 0,50 Q 100,100 200,50 L 200,80 Q 100,130 0,80 Z" fill="#5c6b54" stroke="#2c3327" stroke-width="1.5"/>
+                            <path d="M -20,80 Q 100,130 220,80 L 220,110 Q 100,160 -20,110 Z" fill="#4a5743" stroke="#2c3327" stroke-width="1.5"/>
+                            <!-- Bushes detail -->
+                            <path d="M 20,65 Q 30,75 40,65 T 60,65 T 80,65" fill="none" stroke="#2c3327" stroke-width="1" opacity="0.5"/>
+                        </g>
+                        
+                        <!-- Lower rocks / landscape -->
+                        <path d="M 300,1500 Q 400,1400 450,1500 T 550,1600 Z" fill="#5c6b54" stroke="#2c3327" stroke-width="2"/>
+                        <path d="M 700,1450 Q 800,1350 850,1450 T 950,1550 Z" fill="#7e8c75" stroke="#2c3327" stroke-width="2"/>
+                    </g>
+
+                    <!-- TEA CUP HERO (1800 - 2400) -->
+                    <g id="teacup-section">
+                        <!-- Teapot -->
+                        <g transform="translate(350, 1950)">
+                            <path d="M 40,60 C 40,20 120,20 120,60 C 140,120 20,120 40,60 Z" fill="#8c775e" stroke="#2c3327" stroke-width="2"/>
+                            <path d="M 40,60 C 40,20 120,20 120,60 C 140,120 20,120 40,60 Z" fill="#4a5743" opacity="0.3"/>
+                            <!-- Spout -->
+                            <path d="M 45,70 Q 10,60 10,40 Q 20,40 35,50" fill="#8c775e" stroke="#2c3327" stroke-width="2"/>
+                            <!-- Handle -->
+                            <path d="M 115,50 C 150,40 160,90 115,100" fill="none" stroke="#2c3327" stroke-width="8" stroke-linecap="round"/>
+                            <path d="M 115,50 C 150,40 160,90 115,100" fill="none" stroke="#8c775e" stroke-width="4" stroke-linecap="round"/>
+                            <!-- Lid -->
+                            <path d="M 60,25 C 60,10 100,10 100,25 Z" fill="#4a5743" stroke="#2c3327" stroke-width="2"/>
+                            <circle cx="80" cy="10" r="6" fill="#2c3327"/>
+                        </g>
+
+                        <!-- Large Tea Cup -->
+                        <g transform="translate(550, 1980)">
+                            <ellipse cx="120" cy="30" rx="110" ry="25" fill="#4a5743" stroke="#2c3327" stroke-width="2"/>
+                            <ellipse cx="120" cy="30" rx="90" ry="18" fill="#7e8c75" />
+                            <path d="M 10,30 C 10,100 40,150 120,150 C 200,150 230,100 230,30 Z" fill="#5c6b54" stroke="#2c3327" stroke-width="2"/>
+                            <path d="M 10,30 C 10,100 40,150 120,150 C 200,150 230,100 230,30 Z" fill="#2c3327" opacity="0.2"/>
+                            <rect x="90" y="150" width="60" height="10" fill="#2c3327" rx="2"/>
+                            <rect x="80" y="160" width="80" height="15" fill="#5c6b54" stroke="#2c3327" stroke-width="2" rx="4"/>
+                            
+                            <!-- Steam group animated via GSAP -->
+                            <g id="cup-steam-group" opacity="0">
+                                <path class="steam-line" d="M 120,10 C 100,-40 150,-80 120,-130" />
+                                <path class="steam-line" d="M 100,15 C 80,-30 110,-70 90,-110" style="animation-delay: 2s; stroke-width: 2;"/>
+                                <path class="steam-line" d="M 140,15 C 160,-30 130,-70 150,-110" style="animation-delay: 4s; stroke-width: 2.5;"/>
+                            </g>
+                        </g>
+                    </g>
+                </svg>
+
+                <!-- UI LAYER (Annotations and Infographics) -->
+                <div class="ui-layer">
+                    
+                    <!-- Left Side Columns (Fades out in Scene 2) -->
+                    <div id="left-col" class="side-column ui-element">
+                        <div class="flex flex-col gap-2">
+                            <div class="red-seal w-12 h-12 text-2xl">茶</div>
+                            <h1 class="vertical-rl text-5xl font-bold font-en mt-4 h-48">The Origin of Tea</h1>
+                        </div>
+                        <div class="border-t border-[var(--ink)] pt-4 opacity-70">
+                            <h3 class="font-bold mb-2">Camellia Sinensis</h3>
+                            <p class="text-xs font-data leading-relaxed">Cultivated for millennia, the tea plant requires specific high-altitude climates. This poster documents its journey from mountain to cup.</p>
+                        </div>
+                        <div class="mt-8">
+                            <div class="text-4xl font-en mb-1">48%</div>
+                            <div class="text-[10px] font-data uppercase tracking-wider opacity-60 border-b border-[var(--ink)] pb-1">Global Mountain Yield</div>
+                        </div>
+                    </div>
+
+                    <!-- Right Side Columns (Fades out in Scene 2) -->
+                    <div id="right-col" class="side-column ui-element">
+                        <div class="vertical-rl text-xl font-bold tracking-[0.2em] h-32 border-l-2 border-[var(--ink)] pl-2">中國茶文化</div>
+                        
+                        <div class="mt-12 opacity-80">
+                            <svg width="100%" height="120" viewBox="0 0 200 120">
+                                <!-- Mini Process Diagram -->
+                                <text x="10" y="20" font-size="10" font-family="Noto Serif TC" font-weight="bold">傳統工藝</text>
+                                <circle cx="30" cy="50" r="15" fill="none" stroke="var(--ink)"/>
+                                <text x="30" y="53" font-size="8" text-anchor="middle">採摘</text>
+                                <line x1="45" y1="50" x2="65" y2="50" class="infographic-line"/>
+                                
+                                <circle cx="80" cy="50" r="15" fill="none" stroke="var(--ink)"/>
+                                <text x="80" y="53" font-size="8" text-anchor="middle">萎凋</text>
+                                <line x1="95" y1="50" x2="115" y2="50" class="infographic-line"/>
+                                
+                                <circle cx="130" cy="50" r="15" fill="none" stroke="var(--ink)"/>
+                                <text x="130" y="53" font-size="8" text-anchor="middle">乾燥</text>
+                            </svg>
+                        </div>
+                        <div class="border border-[var(--ink)] p-4 text-xs font-data bg-[var(--paper-dark)]/30">
+                            <strong>Note:</strong> Process varies deeply by region, altitude, and intended oxidation level.
+                        </div>
+                    </div>
+
+                    <!-- Scene 03: Mountain Text -->
+                    <div id="scene-03-text" class="ui-element scene-text w-64" style="top: 500px; left: 150px;">
+                        <h2 class="text-2xl font-bold mb-2">武夷高山 <br><span class="text-sm font-en italic text-[var(--green-main)]">High Elevation</span></h2>
+                        <p class="text-xs leading-relaxed">The finest teas are born in the mists. High elevation slows the leaf's growth, concentrating complex amino acids and volatile oils.</p>
+                        <svg class="absolute top-10 left-[100%] w-48 h-12 overflow-visible">
+                            <line x1="0" y1="0" x2="120" y2="20" class="infographic-line" />
+                            <circle cx="120" cy="20" r="4" fill="var(--red-accent)" />
+                        </svg>
+                    </div>
+
+                    <!-- Scene 05: Tea Field Stats -->
+                    <div id="scene-05-text" class="ui-element scene-text w-64" style="top: 1100px; right: 200px;">
+                        <h3 class="text-sm font-bold text-[var(--red-accent)] mb-3 uppercase tracking-widest border-b border-[var(--ink)] pb-1">Cultivation Data</h3>
+                        <div class="space-y-2 font-data text-xs">
+                            <div class="flex justify-between border-b border-[var(--ink)]/20 pb-1"><span>Altitude</span> <strong>1,250m</strong></div>
+                            <div class="flex justify-between border-b border-[var(--ink)]/20 pb-1"><span>Humidity</span> <strong>82%</strong></div>
+                            <div class="flex justify-between border-b border-[var(--ink)]/20 pb-1"><span>Temp</span> <strong>18°C</strong></div>
+                        </div>
+                        <svg class="absolute top-10 right-[100%] w-48 h-12 overflow-visible">
+                            <line x1="0" y1="0" x2="-120" y2="20" class="infographic-line" />
+                            <circle cx="-120" cy="20" r="4" fill="var(--red-accent)" />
+                        </svg>
+                    </div>
+
+                    <!-- Scene 06: Leaf Details -->
+                    <div id="scene-06-text" class="ui-element scene-text w-72" style="top: 1400px; left: 200px;">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="red-seal text-xs w-6 h-6">綠</span>
+                            <h3 class="font-en text-lg font-bold italic">Camellia Sinensis</h3>
+                        </div>
+                        <p class="text-xs leading-relaxed border-b border-[var(--ink)]/20 pb-2 mb-2">
+                            The mother plant. Only the youngest buds and first two leaves are hand-plucked during the imperial harvest.
+                        </p>
+                        <div class="flex justify-between font-data text-xs text-[var(--red-accent)]">
+                            <span>Yield: 18%</span>
+                            <span>Grade: A+</span>
+                        </div>
+                    </div>
+
+                    <!-- Scene 08: Tea Cup Hero Text -->
+                    <div id="scene-08-text" class="ui-element text-center" style="top: 2200px; left: 50%; transform: translateX(-50%); width: 400px; opacity: 0;">
+                        <h2 class="font-en text-5xl font-bold mb-4 italic">A Cup of Nature</h2>
+                        <p class="text-sm leading-relaxed p-4 border border-[var(--ink)]/30 bg-[var(--paper)]/80 backdrop-blur-md rounded-sm">
+                            The vessel absorbs the memory of every steep. Water, temperature, and time dance together to extract the soul of the mountain trapped within the withered leaf.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        
+        <!-- Scroll Spacer determines length of scroll experience -->
+        <div id="scroll-spacer" style="height: 1200vh;"></div>
+    </div>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Responsive calculations
+        const canvas = document.getElementById('poster-canvas');
+        
+        // Initial setup to fit poster in screen (Scene 1)
+        function initScale() {
+            const wh = window.innerHeight;
+            const ww = window.innerWidth;
+            const canvasW = 1200;
+            const canvasH = 2400;
+            
+            // Calculate scale to fit height mostly, leaving some margin
+            let baseScale = (wh * 0.95) / canvasH;
+            if (ww < 768) {
+                // on mobile, fit width
+                baseScale = (ww * 0.95) / canvasW;
+            }
+            
+            gsap.set(canvas, { scale: baseScale, x: 0, y: 0 }); // Center X is handled by transform-origin or left/top logic
+            
+            // We use transform-origin top left, so we must calculate offset
+            const xOffset = (ww - (canvasW * baseScale)) / 2;
+            const yOffset = (wh - (canvasH * baseScale)) / 2;
+            gsap.set(canvas, { x: xOffset, y: yOffset });
+            
+            return { scale: baseScale, xOffset, yOffset };
+        }
+
+        let baseSetup = initScale();
+        window.addEventListener('resize', () => {
+            if (!ScrollTrigger.isScrolling()) {
+                baseSetup = initScale();
+            }
+        });
+
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: "#scrolly-container",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 1.5 // Smooth scrub
+            }
+        });
+
+        // Helper to center a specific point (targetX, targetY) of the canvas into the viewport
+        function getTransform(targetX, targetY, targetScale) {
+            const ww = window.innerWidth;
+            const wh = window.innerHeight;
+            // The canvas top-left will be placed at (x, y) so that (targetX, targetY)*targetScale is at center
+            const x = (ww / 2) - (targetX * targetScale);
+            const y = (wh / 2) - (targetY * targetScale);
+            return { x, y, scale: targetScale };
+        }
+
+        // SCENE 02: Enter the Mountain (zoom into top mountain peak y~450)
+        let s2 = getTransform(600, 450, window.innerWidth < 768 ? 1.2 : 1.0);
+        tl.to(canvas, { scale: s2.scale, x: s2.x, y: s2.y, duration: 2 }, "scene2")
+          .to(".side-column", { opacity: 0.1, duration: 1.5 }, "scene2");
+
+        // Cloud parallax effect during mountain zoom
+        tl.to(".cloud", { x: (i) => (i%2==0 ? 40 : -40), duration: 4 }, "scene2");
+
+        // SCENE 03: Mountain Story
+        tl.to("#scene-03-text", { opacity: 1, y: -20, duration: 1 }, "scene3")
+          .to({}, { duration: 1.5 }) // HOLD
+          .to("#scene-03-text", { opacity: 0, y: -40, duration: 1 });
+
+        // SCENE 04 & 05: Journey Down & Tea Field (y ~ 1100)
+        let s5 = getTransform(600, 1100, window.innerWidth < 768 ? 1.4 : 1.1);
+        tl.to(canvas, { scale: s5.scale, x: s5.x, y: s5.y, duration: 3 }, "scene5")
+          .to("#scene-05-text", { opacity: 1, x: -20, duration: 1 }, "scene5+=2")
+          .to({}, { duration: 1.5 })
+          .to("#scene-05-text", { opacity: 0, x: -40, duration: 1 });
+
+        // SCENE 06: Leaf Details / Mid landscape (y ~ 1400)
+        let s6 = getTransform(400, 1400, window.innerWidth < 768 ? 1.5 : 1.2);
+        tl.to(canvas, { scale: s6.scale, x: s6.x, y: s6.y, duration: 2.5 }, "scene6")
+          .to("#scene-06-text", { opacity: 1, y: -20, duration: 1 }, "scene6+=1.5")
+          .to({}, { duration: 1.5 })
+          .to("#scene-06-text", { opacity: 0, y: -40, duration: 1 });
+
+        // SCENE 08: Tea Cup Hero (y ~ 2100)
+        let s8 = getTransform(600, 2100, window.innerWidth < 768 ? 1.6 : 1.3);
+        tl.to(canvas, { scale: s8.scale, x: s8.x, y: s8.y, duration: 3 }, "scene8")
+          .to("#scene-08-text", { opacity: 1, y: -20, duration: 1 }, "scene8+=2")
+          .to("#cup-steam-group", { opacity: 1, duration: 1.5 }, "scene8+=2")
+          .to({}, { duration: 2 })
+          .to("#scene-08-text", { opacity: 0, y: -40, duration: 1 })
+          .to("#cup-steam-group", { opacity: 0, duration: 1 });
+
+        // SCENE 09: Final Composition (Revert to poster)
+        tl.to(canvas, { 
+            scale: () => baseSetup.scale, 
+            x: () => baseSetup.xOffset, 
+            y: () => baseSetup.yOffset, 
+            duration: 3, 
+            ease: "power2.inOut" 
+        }, "scene9")
+        .to(".side-column", { opacity: 1, duration: 2 }, "scene9+=1");
+
+    </script>
+</body>
+</html>

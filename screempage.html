@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sketchbook Interactive Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Mali:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper-base: #f7f2e7;
+      --paper-grid: #ded3be;
+      --ink: #2b2b2b;
+      --pencil: #52504c;
+      --yellow-note: #ffefa8;
+      --blue-note: #d1ecf1;
+      --red-note: #ffd6d6;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      min-height: 100vh;
+      background-color: #3b3630;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Mali', cursive;
+      color: var(--ink);
+    }
+
+    /* Sketchbook Frame */
+    .notebook {
+      position: relative;
+      width: 1000px;
+      height: 640px;
+      background-color: var(--paper-base);
+      background-image: 
+        radial-gradient(var(--paper-grid) 1px, transparent 1px),
+        linear-gradient(to right, rgba(0,0,0,0.05) 0%, transparent 8%, transparent 92%, rgba(0,0,0,0.05) 100%);
+      background-size: 24px 24px, 100% 100%;
+      border: 3px solid var(--ink);
+      border-radius: 12px;
+      box-shadow: 18px 22px 0px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 36px;
+    }
+
+    /* Hand-drawn Wobble Animation */
+    @keyframes wiggle {
+      0%   { transform: rotate(0.4deg) translate(0px, 0px); }
+      25%  { transform: rotate(-0.6deg) translate(-1px, 1px); }
+      50%  { transform: rotate(0.8deg) translate(1px, -0.5px); }
+      75%  { transform: rotate(-0.3deg) translate(0px, 0.5px); }
+      100% { transform: rotate(0.4deg) translate(0px, 0px); }
+    }
+
+    .hand-drawn {
+      border: 2px solid var(--ink);
+      border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+    }
+
+    /* HUD Bar */
+    .hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px dashed var(--pencil);
+      padding-bottom: 12px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      padding: 6px 14px;
+      box-shadow: 2px 3px 0 var(--ink);
+    }
+
+    .hp-pencil {
+      display: flex;
+      gap: 4px;
+    }
+
+    .hp-dot {
+      width: 14px;
+      height: 14px;
+      background: #f75d5d;
+      border: 1.5px solid var(--ink);
+      border-radius: 50%;
+    }
+
+    /* Quest Stage Cards */
+    .world-map {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      position: relative;
+      margin-top: 10px;
+    }
+
+    .dotted-path {
+      position: absolute;
+      top: 50%;
+      left: 10%;
+      width: 80%;
+      height: 2px;
+      border-top: 3px dashed var(--pencil);
+      z-index: 1;
+      transform: translateY(-50%);
+    }
+
+    .stage-card {
+      position: relative;
+      z-index: 2;
+      width: 180px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      background-color: #fff;
+      animation: wiggle 0.6s infinite steps(2);
+    }
+
+    .stage-card:nth-child(2) { background: var(--yellow-note); transform: rotate(-2deg); }
+    .stage-card:nth-child(3) { background: var(--blue-note); transform: rotate(1deg); }
+    .stage-card:nth-child(4) { background: var(--red-note); transform: rotate(-1.5deg); }
+
+    .stage-card:hover {
+      transform: scale(1.08) translateY(-6px) !important;
+      box-shadow: 6px 8px 0 var(--ink);
+    }
+
+    .stage-tag {
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: bold;
+      color: #666;
+    }
+
+    .stage-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 8px 0 4px;
+    }
+
+    /* Player Character */
+    #hero {
+      position: absolute;
+      width: 44px;
+      height: 52px;
+      bottom: 90px;
+      left: 80px;
+      transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), bottom 0.5s ease;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .hero-sprite {
+      font-size: 38px;
+      animation: wiggle 0.25s infinite alternate;
+      display: inline-block;
+      filter: drop-shadow(2px 3px 0 var(--ink));
+    }
+
+    /* Message Bubble */
+    .dialogue-box {
+      background: #ffffff;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 4px 4px 0 var(--ink);
+    }
+
+    /* Modal / Pop-up Preview */
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(43, 43, 43, 0.5);
+      backdrop-filter: blur(2px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 20;
+    }
+
+    .modal-paper {
+      width: 480px;
+      background: var(--paper-base);
+      padding: 30px;
+      box-shadow: 10px 12px 0 var(--ink);
+      text-align: center;
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      background: none;
+      border: 2px solid var(--ink);
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="notebook hand-drawn">
+    <!-- Top HUD -->
+    <div class="hud">
+      <div class="status-badge hand-drawn">
+        <span>LV.1 Doodle Explorer</span>
+      </div>
+      <div class="status-badge hand-drawn">
+        <span>HP (Pencils):</span>
+        <div class="hp-pencil">
+          <div class="hp-dot"></div>
+          <div class="hp-dot"></div>
+          <div class="hp-dot"></div>
+        </div>
+      </div>
+      <div class="status-badge hand-drawn" style="cursor: pointer;" onclick="say('กดคลิกเลือกสเตจเพื่อให้ตัวละครเดินไป!')">
+        <span>🎒 Bag: 3 Items</span>
+      </div>
+    </div>
+
+    <!-- Middle Game Area -->
+    <div class="world-map">
+      <div class="dotted-path"></div>
+
+      <div class="stage-card hand-drawn" onclick="moveTo(120, 'STAGE 1: About Me', 'ยินดีต้อนรับสู่โลกสมุดวาดภาพ! ฉันคือดีไซเนอร์ที่ชอบทำให้เว็บมีชีวิตเหมือนเกม')">
+        <div class="stage-tag">Stage 01</div>
+        <div class="stage-title">About Me</div>
+        <small>✏️ จุดเริ่มต้น</small>
+      </div>
+
+      <div class="stage-card hand-drawn" onclick="moveTo(410, 'STAGE 2: Quests & Works', 'โปรเจกต์งานที่ผ่านมา: ทำเกม 2D บน Canvas, ระบบ Pop-up Web Comic และ UI งานกระดาษ')">
+        <div class="stage-tag">Stage 02</div>
+        <div class="stage-title">Projects</div>
+        <small>⚔️ ผลงานคัดสรร</small>
+      </div>
+
+      <div class="stage-card hand-drawn" onclick="moveTo(700, 'STAGE 3: Secret Tavern', 'ส่งข้อความติดต่อ หรือนกพิราบสื่อสารมาคุยเรื่องโปรเจกต์ใหม่กันได้เลย!')">
+        <div class="stage-tag">Stage 03</div>
+        <div class="stage-title">Contact</div>
+        <small>📮 ส่งข้อความ</small>
+      </div>
+    </div>
+
+    <!-- Character on Screen -->
+    <div id="hero">
+      <span class="hero-sprite">🧙‍♂️</span>
+    </div>
+
+    <!-- Bottom Dialogue Box -->
+    <div class="dialogue-box hand-drawn">
+      <div style="font-size: 24px;">💬</div>
+      <div id="npc-text" style="font-size: 15px;">คลิกที่การ์ดด่านต่างๆ ด้านบน เพื่อให้ตัวละครเดินทางไปสำรวจข้อมูล...</div>
+    </div>
+
+    <!-- Stage Content Modal -->
+    <div class="modal-overlay" id="modal">
+      <div class="modal-paper hand-drawn">
+        <button class="close-btn" onclick="closeModal()">✕</button>
+        <h2 id="modal-title" style="margin-top: 0;">STAGE</h2>
+        <p id="modal-body" style="line-height: 1.6; font-size: 16px; margin: 20px 0;"></p>
+        <button class="status-badge hand-drawn" onclick="closeModal()" style="cursor: pointer; padding: 8px 24px;">
+          รับทราบ / ย้อนกลับ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const hero = document.getElementById('hero');
+    const dialogue = document.getElementById('npc-text');
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+
+    function moveTo(xPos, title, content) {
+      // เลื่อนตัวละครไปตำแหน่งการ์ด
+      hero.style.left = (xPos + 55) + 'px';
+      hero.style.bottom = '170px';
+      
+      dialogue.innerText = 'กำลังเดินทางไป ' + title + '...';
+
+      // จำลองเปิดกระดาษบันทึกเมื่อเดินถึง
+      setTimeout(() => {
+        hero.style.bottom = '90px';
+        openModal(title, content);
+      }, 550);
+    }
+
+    function openModal(title, text) {
+      modalTitle.innerText = title;
+      modalBody.innerText = text;
+      modal.style.display = 'flex';
+      dialogue.innerText = 'เปิดอ่านข้อมูล: ' + title;
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
+      dialogue.innerText = 'เลือกด่านถัดไปที่ต้องการเดินทาง...';
+    }
+
+    function say(text) {
+      dialogue.innerText = text;
+    }
+  </script>
+</body>
+</html>
