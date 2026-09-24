@@ -29,7 +29,7 @@ export function MediaPlaceholder({
         <Image src={src} alt={alt} fill priority={priority} sizes={sizes} onError={() => setIsMissing(true)} />
       )}
       {isMissing && (
-        <div className="media__placeholder" role="img" aria-label={`${alt}. Production asset missing.`}>
+        <div className="media__placeholder" role={alt ? "img" : undefined} aria-label={alt ? `${alt}. Production asset missing.` : undefined} aria-hidden={alt ? undefined : true}>
           <span>Production asset required</span>
           <strong>{label}</strong>
           <code>{src}</code>

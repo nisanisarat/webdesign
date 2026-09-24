@@ -19,6 +19,7 @@ export function Homepage() {
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const flavorShelfRef = useRef<HTMLDivElement>(null);
   const momentsStripRef = useRef<HTMLDivElement>(null);
+  const galleryTrackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!activeScene) return;
@@ -53,6 +54,13 @@ export function Homepage() {
     strip.scrollBy({ left: direction * strip.clientWidth * 0.64, behavior: reduceMotion ? "auto" : "smooth" });
   };
 
+  const scrollGallery = (direction: -1 | 1) => {
+    const track = galleryTrackRef.current;
+    if (!track) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    track.scrollBy({ left: direction * track.clientWidth * 0.7, behavior: reduceMotion ? "auto" : "smooth" });
+  };
+
   return (
     <>
     <main>
@@ -66,7 +74,7 @@ export function Homepage() {
         />
         <Header />
         <div className="hero__content">
-          <p className="script-line">Good Ice Cream<br />Brighter Days</p>
+          <p className="script-line hero__slogan"><span>Good</span><span>Ice Cream</span><span>Brighter Days</span></p>
           <p className="hero__thai">ไอศกรีมดี ๆ<br />ทำให้ทุกวันสดใสขึ้น</p>
           <a className="button" href="#flavors">Discover Our Menu <Arrow /></a>
         </div>
@@ -156,24 +164,31 @@ export function Homepage() {
     </main>
     {activeScene && (
       <div className={`scene scene--${activeScene}`} role="dialog" aria-modal="true" aria-label={`${activeScene} experience`}>
-        <button className="scene__back" type="button" onClick={() => setActiveScene(null)}>← Back</button>
-        <button ref={closeButtonRef} className="scene__close" type="button" onClick={() => setActiveScene(null)} aria-label="Close scene">×</button>
+        {activeScene !== "flavor" && <>
+          <button className="scene__back" type="button" onClick={() => setActiveScene(null)}>← Back</button>
+          <button ref={closeButtonRef} className="scene__close" type="button" onClick={() => setActiveScene(null)} aria-label="Close scene">×</button>
+        </>}
 
         {activeScene === "flavor" && (
           <div className="scene__layout flavor-scene">
+            <button className="scene__back" type="button" onClick={() => setActiveScene(null)}>← Back to Menu</button>
+            <button ref={closeButtonRef} className="scene__close" type="button" onClick={() => setActiveScene(null)} aria-label="Close scene">×</button>
             <div className="scene__copy">
               <p className="script-line script-line--small">{flavors[selectedFlavor].name}</p>
               <h2>{flavors[selectedFlavor].nameTh}</h2>
-              <p>ไอศกรีมโฮมเมดเนื้อเนียน หอมหวานพอดี ผลิตจากวัตถุดิบคุณภาพ</p>
-              <div className="flavor-profile"><span>Fresh</span><span>Balanced</span><span>Creamy</span></div>
-              <strong className="scene__price">฿120</strong>
-              <button className="button" type="button">Order Now <Arrow /></button>
+              <p>{selectedFlavor === 1 ? "ไอศกรีมสตรอว์เบอร์รีโฮมเมด หอมหวาน สดชื่น จากผลไม้แท้ 100%" : "ไอศกรีมโฮมเมดเนื้อเนียน หอมหวานพอดี ผลิตจากวัตถุดิบคุณภาพ"}</p>
+              <div className="flavor-profile">
+                <span><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 8c-3-3-7-2-9 1-3 4 2 11 9 17 7-6 12-13 9-17-2-3-6-4-9-1Z"/><path d="M10 8c2-3 4-4 6-4s4 1 6 4M16 4v5"/></svg><span>{selectedFlavor === 1 ? "Fresh Strawberry" : "Fresh Ingredients"}</span></span>
+                <span><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="16" r="11"/><path d="M16 9v9"/><circle cx="16" cy="23" r="1" fill="currentColor" stroke="none"/></svg><span>{selectedFlavor === 1 ? "Sweet & Sour Balance" : "Balanced Flavor"}</span></span>
+                <span><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16 27 5.5 16.8C-1 10.2 8 3 16 11c8-8 17-1 10.5 5.8L16 27Z"/></svg><span>Favorite</span></span>
+              </div>
+              <div className="flavor-order"><strong className="scene__price">฿ 120</strong><button className="button" type="button">Order Now <Arrow /></button></div>
             </div>
-            <MediaPlaceholder src={flavors[selectedFlavor].asset} alt={`${flavors[selectedFlavor].name} detail`} label={`${flavors[selectedFlavor].name} detail photograph`} className="scene__hero-media" sizes="55vw" />
+            <MediaPlaceholder src={flavors[selectedFlavor].asset} alt={`${flavors[selectedFlavor].name} detail`} label={`${flavors[selectedFlavor].name} detail photograph`} className="scene__hero-media" sizes="(max-width: 720px) 100vw, 50vw" />
             <aside className="flavor-switcher" aria-label="You may also like">
               <p>You may also like</p>
-              {flavors.map((flavor, index) => (
-                <button key={flavor.name} type="button" className={index === selectedFlavor ? "is-active" : ""} onClick={() => setSelectedFlavor(index)}>
+              {flavors.map((flavor, index) => index !== selectedFlavor && (
+                <button key={flavor.name} type="button" onClick={() => setSelectedFlavor(index)}>
                   <MediaPlaceholder src={flavor.asset} alt="" label={flavor.name} />
                   <span>{flavor.name}</span>
                 </button>
@@ -220,7 +235,14 @@ export function Homepage() {
         )}
 
         {activeScene === "gallery" && (
-          <div className="gallery-scene"><div className="gallery-scene__title"><h2>#PalméMoments</h2><p>ช่วงเวลาแห่งความสุขของคุณ</p></div><div className="gallery-scene__track">{moments.map((moment) => <MediaPlaceholder key={moment.asset} src={moment.asset} alt={moment.alt} label={moment.alt} />)}</div></div>
+          <div className="gallery-scene">
+            <div className="gallery-scene__title"><h2>#PalméMoments</h2><p>ช่วงเวลาแห่งความสุขของคุณ</p></div>
+            <div className="gallery-scene__rail">
+              <button className="carousel-control carousel-control--previous" type="button" onClick={() => scrollGallery(-1)} aria-label="Previous gallery image">←</button>
+              <div className="gallery-scene__track" ref={galleryTrackRef}>{moments.map((moment) => <MediaPlaceholder key={moment.asset} src={moment.asset} alt={moment.alt} label={moment.alt} />)}</div>
+              <button className="carousel-control carousel-control--next" type="button" onClick={() => scrollGallery(1)} aria-label="Next gallery image">→</button>
+            </div>
+          </div>
         )}
       </div>
     )}
