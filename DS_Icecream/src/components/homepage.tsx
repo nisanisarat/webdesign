@@ -157,9 +157,17 @@ export function Homepage() {
 
       <footer className="footer" id="visit">
         <div className="footer__brand"><span>Palmé</span><small>Beach Bar</small></div>
-        <nav aria-label="Footer navigation"><a href="#home">Home</a><a href="#flavors">Menu</a><a href="#story">Our Story</a><a href="#moments">Gallery</a></nav>
-        <div className="footer__social" aria-label="Social links"><a href="#visit">Instagram</a><a href="#visit">Facebook</a><a href="#visit">TikTok</a><a href="#visit">LINE</a></div>
-        <p>Open daily · 10:00–20:00<br /><a href="#visit">Get Direction →</a></p>
+        <div className="footer__links">
+          <nav aria-label="Footer navigation"><a href="#home">Home</a><a href="#flavors">Menu</a><a href="#story">Our Story</a><a href="#moments">Gallery</a><a href="#visit">Contact</a></nav>
+          <p>© 2024 Palmé Beach Bar. All Rights Reserved.</p>
+        </div>
+        <div className="footer__social" aria-label="Social links">
+          <a href="#visit" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><path d="M17.5 6.5h.01" /></svg></a>
+          <a href="#visit" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 8h3V4h-3c-3 0-5 2-5 5v3H6v4h3v5h4v-5h3l1-4h-4V9c0-.7.3-1 1-1Z" /></svg></a>
+          <a href="#visit" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 3v11.2a3.8 3.8 0 1 1-3-3.7" /><path d="M14 3c1 2.5 2.7 4 5 4.3" /></svg></a>
+          <a href="#visit" aria-label="LINE"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 10.5c0-3.6-3.6-6.5-8-6.5s-8 2.9-8 6.5 3.6 6.5 8 6.5c.7 0 1.4-.1 2-.3l3.7 2 .4-3.4c1.2-1.2 1.9-2.9 1.9-4.8Z" /><path d="M8 10h.01m4 0h.01m4 0h.01" /></svg></a>
+        </div>
+        <p className="footer__signoff">See you<br />at the Beach ♡</p>
       </footer>
     </main>
     {activeScene && (
@@ -229,7 +237,19 @@ export function Homepage() {
 
         {activeScene === "event" && (
           <div className="scene__layout event-scene">
-            <div className="scene__copy"><p className="scene__kicker">Special Event</p><p className="script-line script-line--small">White Summer &apos;26</p><p>ฤดูร้อนนี้พบกับเมนูลิมิเต็ดและกิจกรรมริมทะเล</p><strong>1 Mar – 30 Apr 2026</strong><div className="event-features"><span>Limited Flavor</span><span>Beach Photo Spot</span><span>Special Menu</span></div><button className="button" type="button">See Event Details <Arrow /></button></div>
+            <div className="scene__copy">
+              <p className="scene__kicker">Special Event</p>
+              <p className="script-line script-line--small">White Summer &apos;26</p>
+              <p>ฤดูร้อนนี้พบกับเมนูลิมิเต็ดและกิจกรรมริมทะเล</p>
+              <strong className="event-date"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4m10-4v4M3 10h18" /></svg>1 Mar – 30 Apr 2026</strong>
+              <div className="event-features">
+                <span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21c5-4 8-8 8-12a8 8 0 0 0-16 0c0 4 3 8 8 12Z" /><path d="M9 9c1-2 2-3 3-3" /></svg>Limited Flavor</span>
+                <span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="9" cy="10" r="2" /><path d="m5 18 5-4 3 2 3-4 3 3" /></svg>Beach Photo Spot</span>
+                <span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20 4.5 12.5C0 8 6 2 12 8c6-6 12 0 7.5 4.5L12 20Z" /></svg>Special Menu</span>
+              </div>
+              <button className="button" type="button">See Event Details <Arrow /></button>
+            </div>
+            <p className="event-scene__tagline" aria-hidden="true">Summer<br />tastes<br />better<br />together ♡</p>
             <MediaPlaceholder src="/assets/campaign-white-summer.webp" alt="White Summer campaign" label="White Summer campaign photograph" className="scene__hero-media" />
           </div>
         )}
