@@ -1,7 +1,7 @@
 "use client";
 
 // USING GLOBAL CSS: [src/app/globals.css]
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 import { useState } from "react";
 
 type MediaPlaceholderProps = {
@@ -11,6 +11,7 @@ type MediaPlaceholderProps = {
   className?: string;
   priority?: boolean;
   sizes?: string;
+  mobileSrc?: string;
 };
 
 export function MediaPlaceholder({
@@ -20,12 +21,25 @@ export function MediaPlaceholder({
   className = "",
   priority = false,
   sizes = "100vw",
+  mobileSrc,
 }: MediaPlaceholderProps) {
   const [isMissing, setIsMissing] = useState(false);
+  const responsiveImage = mobileSrc
+    ? {
+        desktop: getImageProps({ src, alt, fill: true, priority, sizes }).props,
+        mobile: getImageProps({ src: mobileSrc, alt, fill: true, sizes: "100vw" }).props,
+      }
+    : null;
 
   return (
     <div className={`media ${className}`} data-missing={isMissing || undefined}>
-      {!isMissing && (
+      {!isMissing && responsiveImage && (
+        <picture>
+          <source media="(max-width: 860px)" srcSet={responsiveImage.mobile.srcSet} sizes={responsiveImage.mobile.sizes} />
+          <img {...responsiveImage.desktop} alt={alt} onError={() => setIsMissing(true)} />
+        </picture>
+      )}
+      {!isMissing && !responsiveImage && (
         <Image src={src} alt={alt} fill priority={priority} sizes={sizes} onError={() => setIsMissing(true)} />
       )}
       {isMissing && (
