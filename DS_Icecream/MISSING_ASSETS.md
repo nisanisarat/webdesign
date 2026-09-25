@@ -1,24 +1,49 @@
 # Missing Production Assets
 
-The supplied mockup is a visual reference only. No files were found in `public/assets/` during Phase 3 setup.
+> Last updated: 2026-09-25 16:21:27 UTC+07:00
 
-Required files:
+## Objective
 
-1. `public/assets/palme-logo.svg` — official Palmé Beach Bar wordmark.
-2. `public/assets/hero-beach-cafe.webp` — wide hero photograph with usable negative space on the left.
-3. `public/assets/flavor-vanilla.webp` — transparent Vanilla Dream product image.
-4. `public/assets/flavor-strawberry.webp` — transparent Strawberry Bliss product image.
-5. `public/assets/flavor-mint.webp` — transparent Mint Cloud product image.
-6. `public/assets/flavor-mango.webp` — transparent Mango Summer product image.
-7. `public/assets/campaign-white-summer.webp` — White Summer campaign photograph.
-8. `public/assets/story-shop.webp` — Palmé storefront photograph.
-9. `public/assets/story-beach.webp` — supporting beach/location photograph.
-10. `public/assets/atmosphere-beach-cafe.webp` — wide homepage café-atmosphere photograph.
-11. `public/assets/atmosphere-indoor.webp` — Indoor scene photograph.
-12. `public/assets/atmosphere-counter.webp` — Counter scene photograph.
-13. `public/assets/atmosphere-outdoor.webp` — Outdoor scene photograph.
-14. `public/assets/atmosphere-beach.webp` — Beach scene photograph.
-15. `public/assets/moments-01.webp` through `moments-06.webp` — social-gallery photographs.
-16. `public/assets/fonts/palme-script.woff2` — approved script/brand accent font, if licensed for web use.
+Track only assets that still block the approved Palmé experience. See `ASSET_MANIFEST.md` for lifecycle and replacement rules.
 
-Place final assets at these paths or update `src/data/content.ts` to match the delivered filenames.
+## Missing
+
+- Official Palmé logo SVG.
+- Licensed Palmé script font.
+- Final approval for the storefront and supporting beach photographs.
+- Final approval for five atmosphere photographs.
+
+## Candidate Requiring Review
+
+- `public/assets/candidates/hero/hero-beach-cafe-mobile-v1.png` — portrait Hero derivative currently used for mobile Preview; requires owner approval before promotion.
+- `public/assets/hero-beach-cafe.png` — 1672×941. It has useful left-side copy space but contains a watermark and does not reproduce the approved storefront composition. Do not promote it to an approved path.
+- `public/assets/candidates/hero/hero-beach-cafe-v2.png` — clean original storefront composition used in the preview.
+- `public/assets/candidates/hero/hero-beach-cafe-v3.png` — earlier reference-aligned storefront candidate with blank wall and chalkboard.
+- `public/assets/candidates/flavors/*-v1.png` — four transparent flavor cutouts used in the preview.
+- `public/assets/story/*.png` — Phase 2 story candidates.
+- `public/assets/atmosphere/*.png` — Phase 2 atmosphere candidates.
+
+## Workflow
+
+1. Generate or supply one candidate asset.
+2. Review composition, subject, artifacts, text, logo, and watermark.
+3. Mark it `approved` in `ASSET_MANIFEST.md` only after owner approval.
+4. Move it to its canonical production path and mark it `locked`.
+5. Never regenerate or overwrite a locked asset without explicit approval.
+
+## Dependencies
+
+- The official logo and licensed script font must come from the brand owner.
+- Generated photographs must contain no embedded typography or logos.
+
+## Configuration
+
+Canonical paths are defined in `ASSET_MANIFEST.md` and consumed from `src/data/content.ts`.
+
+## Usage Example
+
+Review the Hero candidate first, then update the manifest status before changing the code path.
+
+## Limitations
+
+The approved mockup is art direction rather than a source image. It must not be cropped into production assets.
