@@ -1,0 +1,64 @@
+:root {
+  /* Canonical palette from DESIGN.md. */
+  --color-jade-ink: oklch(0.425 0.042 175.1);
+  --color-deep-ink-green: oklch(0.345 0.033 177.4);
+  --color-lotus-water: oklch(0.658 0.040 179.0);
+  --color-mist-water: oklch(0.834 0.024 183.6);
+  --color-lotus-blush: oklch(0.707 0.071 16.7);
+  --color-soft-lotus: oklch(0.850 0.038 26.1);
+  --color-antique-gold: oklch(0.689 0.078 82.7);
+  --color-rice-paper: oklch(0.932 0.020 87.5);
+  --color-ivory-mist: oklch(0.960 0.012 96.4);
+  --color-ink-text: oklch(0.285 0.011 167.8);
+
+  --font-display: var(--font-display-loaded), Georgia, serif;
+  --font-body: var(--font-body-loaded), system-ui, sans-serif;
+  --text-display: clamp(2.75rem, 7vw, 6rem);
+  --text-headline: clamp(2rem, 4vw, 4rem);
+  --text-title: clamp(1.35rem, 2vw, 2rem);
+  --text-body: clamp(1rem, 1.2vw, 1.125rem);
+  --text-label: 0.8125rem;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --leading-display: 0.98;
+  --leading-headline: 1.08;
+  --leading-title: 1.25;
+  --leading-body: 1.7;
+  --leading-label: 1.3;
+  --tracking-display: -0.03em;
+  --tracking-label: 0.04em;
+  --measure-body: 70ch;
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 32px;
+  --space-xl: 64px;
+  --space-section: clamp(72px, 10vw, 160px);
+  --radius-control: 4px;
+  --radius-panel: 12px;
+  --target-min: 44px;
+
+  --shadow-interactive: 0 4px 8px rgb(37 44 41 / 0.16);
+  --shadow-modal: 0 8px 24px rgb(18 26 23 / 0.28);
+  --focus-inner: var(--color-deep-ink-green);
+  --focus-outer: var(--color-antique-gold);
+
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-feedback: 180ms;
+  --duration-layout: 400ms;
+  --duration-hero: 650ms;
+}
+
+/* Initial content breakpoints: 480px, 768px, 1200px. Adjust when content requires it. */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-feedback: 0.01ms;
+    --duration-layout: 0.01ms;
+    --duration-hero: 0.01ms;
+  }
+}
